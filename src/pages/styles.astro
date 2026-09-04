@@ -1,0 +1,1561 @@
+---
+import StylesSectionLabel from '@/components/style-guide/StylesSectionLabel.astro'
+import ColorTokenCard, {
+    type PreviewType,
+} from '@/components/style-guide/ColorTokenCard.astro'
+import RichText from '@/components/RichText.astro'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import Layout from '../layouts/Layout.astro'
+import { Code } from 'astro:components'
+import colors from 'tailwindcss/colors'
+
+interface ColorTokenDefinition {
+    token: string
+    foregroundToken?: string
+    utilities: readonly string[]
+    description: string
+    previewType: PreviewType
+}
+
+interface ColorTokenGroup {
+    title: string
+    description: string
+    tokens: readonly ColorTokenDefinition[]
+}
+
+const semanticColorGroups: readonly ColorTokenGroup[] = [
+    {
+        title: 'Surfaces',
+        description:
+            'The page canvas and elevated containers used to establish hierarchy.',
+        tokens: [
+            {
+                token: 'background',
+                foregroundToken: 'foreground',
+                utilities: ['bg-background', 'text-foreground'],
+                description: 'The default application canvas and body copy.',
+                previewType: 'pair',
+            },
+            {
+                token: 'card',
+                foregroundToken: 'card-foreground',
+                utilities: ['bg-card', 'text-card-foreground'],
+                description: 'Contained content such as cards and panels.',
+                previewType: 'pair',
+            },
+            {
+                token: 'popover',
+                foregroundToken: 'popover-foreground',
+                utilities: ['bg-popover', 'text-popover-foreground'],
+                description: 'Floating surfaces such as menus and popovers.',
+                previewType: 'pair',
+            },
+        ],
+    },
+    {
+        title: 'Actions',
+        description:
+            'Interactive emphasis levels for primary, secondary, and contextual actions.',
+        tokens: [
+            {
+                token: 'primary',
+                foregroundToken: 'primary-foreground',
+                utilities: ['bg-primary', 'text-primary-foreground'],
+                description: 'The highest-emphasis action and brand treatment.',
+                previewType: 'pair',
+            },
+            {
+                token: 'secondary',
+                foregroundToken: 'secondary-foreground',
+                utilities: ['bg-secondary', 'text-secondary-foreground'],
+                description: 'A quieter alternative to the primary action.',
+                previewType: 'pair',
+            },
+            {
+                token: 'accent',
+                foregroundToken: 'accent-foreground',
+                utilities: ['bg-accent', 'text-accent-foreground'],
+                description:
+                    'Contextual emphasis, including hover and selected states.',
+                previewType: 'pair',
+            },
+        ],
+    },
+    {
+        title: 'Content',
+        description:
+            'Lower-emphasis content that supports the primary foreground color.',
+        tokens: [
+            {
+                token: 'muted',
+                foregroundToken: 'muted-foreground',
+                utilities: ['bg-muted', 'text-muted-foreground'],
+                description:
+                    'Subdued surfaces, helper copy, and supporting metadata.',
+                previewType: 'pair',
+            },
+        ],
+    },
+    {
+        title: 'Feedback',
+        description:
+            'Status color reserved for dangerous or destructive outcomes.',
+        tokens: [
+            {
+                token: 'destructive',
+                utilities: ['text-destructive', 'bg-destructive/10'],
+                description:
+                    'Destructive labels, validation messages, and warning treatments.',
+                previewType: 'destructive',
+            },
+        ],
+    },
+    {
+        title: 'Controls',
+        description:
+            'Structural tokens for boundaries, form fields, and keyboard focus.',
+        tokens: [
+            {
+                token: 'border',
+                utilities: ['border-border'],
+                description: 'Default separators and component boundaries.',
+                previewType: 'border',
+            },
+            {
+                token: 'input',
+                utilities: ['border-input'],
+                description:
+                    'The resting boundary of inputs and form controls.',
+                previewType: 'input',
+            },
+            {
+                token: 'ring',
+                utilities: ['ring-ring', 'outline-ring/50'],
+                description:
+                    'The visible focus indicator for interactive controls.',
+                previewType: 'ring',
+            },
+        ],
+    },
+]
+
+const sidebarTokens: readonly ColorTokenDefinition[] = [
+    {
+        token: 'sidebar',
+        foregroundToken: 'sidebar-foreground',
+        utilities: ['bg-sidebar', 'text-sidebar-foreground'],
+        description: 'The sidebar canvas and its default content.',
+        previewType: 'pair',
+    },
+    {
+        token: 'sidebar-primary',
+        foregroundToken: 'sidebar-primary-foreground',
+        utilities: ['bg-sidebar-primary', 'text-sidebar-primary-foreground'],
+        description: 'Prominent actions and active items inside the sidebar.',
+        previewType: 'pair',
+    },
+    {
+        token: 'sidebar-accent',
+        foregroundToken: 'sidebar-accent-foreground',
+        utilities: ['bg-sidebar-accent', 'text-sidebar-accent-foreground'],
+        description: 'Hover, selected, and supporting sidebar states.',
+        previewType: 'pair',
+    },
+    {
+        token: 'sidebar-border',
+        utilities: ['border-sidebar-border'],
+        description: 'Dividers and boundaries within the sidebar.',
+        previewType: 'border',
+    },
+    {
+        token: 'sidebar-ring',
+        utilities: ['ring-sidebar-ring'],
+        description: 'Focus indication for controls inside the sidebar.',
+        previewType: 'ring',
+    },
+]
+
+const chartTokens = [
+    'chart-1',
+    'chart-2',
+    'chart-3',
+    'chart-4',
+    'chart-5',
+] as const
+const foundationSteps = [
+    '50',
+    '100',
+    '200',
+    '300',
+    '400',
+    '500',
+    '600',
+    '700',
+    '800',
+    '900',
+    '950',
+] as const
+const foundationRamps = [
+    { name: 'Orange', slug: 'orange', values: colors.orange },
+    { name: 'Neutral', slug: 'neutral', values: colors.neutral },
+] as const
+
+const headingLevels = [1, 2, 3, 4, 5, 6] as const
+const bodyFontSizes = [
+    'text-9xl',
+    'text-8xl',
+    'text-7xl',
+    'text-6xl',
+    'text-5xl',
+    'text-4xl',
+    'text-3xl',
+    'text-2xl',
+    'text-xl',
+    'text-lg',
+    'text-base',
+    'text-sm',
+    'text-xs',
+] as const
+
+const marginScale = [
+    {
+        topClass: 'mt-0',
+        bottomClass: 'mb-0',
+        value: '0',
+    },
+    {
+        topClass: 'mt-2',
+        bottomClass: 'mb-2',
+        value: '0.5rem',
+    },
+    {
+        topClass: 'mt-4',
+        bottomClass: 'mb-4',
+        value: '1rem',
+    },
+    {
+        topClass: 'mt-8',
+        bottomClass: 'mb-8',
+        value: '2rem',
+    },
+    {
+        topClass: 'mt-16',
+        bottomClass: 'mb-16',
+        value: '4rem',
+    },
+] as const
+
+const otherMarginUtilities = [
+    {
+        className: 'm-0',
+        declaration: 'margin: 0;',
+        stageClass: 'flow-root',
+        exampleClass: 'm-0',
+    },
+    {
+        className: 'mx-auto',
+        declaration: 'margin-inline: auto;',
+        stageClass: 'flow-root',
+        exampleClass: 'mx-auto w-[68%]',
+    },
+    {
+        className: 'mt-auto',
+        declaration: 'margin-top: auto;',
+        stageClass: 'flex min-h-44 flex-col',
+        exampleClass: 'mt-auto',
+    },
+    {
+        className: 'mb-auto',
+        declaration: 'margin-bottom: auto;',
+        stageClass: 'flex min-h-44 flex-col',
+        exampleClass: 'mb-auto',
+    },
+] as const
+
+const marginStageClasses =
+    'bg-primary/5 [background-image:repeating-linear-gradient(-45deg,transparent_0_3px,color-mix(in_oklab,var(--primary)_70%,transparent)_3px_4px)]'
+const spacingExampleClasses =
+    'flex min-h-28 flex-col items-start justify-center gap-5 border border-primary bg-[color-mix(in_oklab,var(--primary)_10%,var(--background))] [&_code]:font-sans [&_code]:text-sm'
+const marginExampleClasses = `${spacingExampleClasses} p-6`
+
+const paddingScale = [
+    {
+        allClass: 'p-0',
+        horizontalClass: 'px-0',
+        verticalClass: 'py-0',
+        value: '0',
+    },
+    {
+        allClass: 'p-2',
+        horizontalClass: 'px-2',
+        verticalClass: 'py-2',
+        value: '0.5rem',
+    },
+    {
+        allClass: 'p-4',
+        horizontalClass: 'px-4',
+        verticalClass: 'py-4',
+        value: '1rem',
+    },
+    {
+        allClass: 'p-8',
+        horizontalClass: 'px-8',
+        verticalClass: 'py-8',
+        value: '2rem',
+    },
+    {
+        allClass: 'p-16',
+        horizontalClass: 'px-16',
+        verticalClass: 'py-16',
+        value: '4rem',
+    },
+] as const
+
+const paddingStageClasses =
+    'bg-primary/5 [background-image:repeating-linear-gradient(-45deg,transparent_0_3px,color-mix(in_oklab,var(--primary)_70%,transparent)_3px_4px)]'
+
+const textAlignmentUtilities = [
+    { className: 'text-left', declaration: 'text-align: left;' },
+    { className: 'text-center', declaration: 'text-align: center;' },
+    { className: 'text-right', declaration: 'text-align: right;' },
+] as const
+
+const lineClampUtilities = [
+    { className: 'line-clamp-1', declaration: '-webkit-line-clamp: 1;' },
+    { className: 'line-clamp-2', declaration: '-webkit-line-clamp: 2;' },
+    { className: 'line-clamp-3', declaration: '-webkit-line-clamp: 3;' },
+] as const
+
+const textWrapUtilities = [
+    { className: 'text-balance', declaration: 'text-wrap: balance;' },
+    { className: 'text-pretty', declaration: 'text-wrap: pretty;' },
+] as const
+
+const overflowUtilities = [
+    { className: 'overflow-auto', declaration: 'overflow: auto;' },
+    { className: 'overflow-hidden', declaration: 'overflow: hidden;' },
+    { className: 'overflow-clip', declaration: 'overflow: clip;' },
+    { className: 'overflow-visible', declaration: 'overflow: visible;' },
+    { className: 'overflow-scroll', declaration: 'overflow: scroll;' },
+] as const
+
+const displayUtilities = [
+    { className: 'block', declaration: 'display: block;' },
+    { className: 'inline', declaration: 'display: inline;' },
+    { className: 'inline-block', declaration: 'display: inline-block;' },
+    { className: 'flex', declaration: 'display: flex;' },
+    { className: 'inline-flex', declaration: 'display: inline-flex;' },
+    { className: 'grid', declaration: 'display: grid;' },
+    { className: 'hidden', declaration: 'display: none;' },
+] as const
+
+const positionUtilities = [
+    { className: 'static', declaration: 'position: static;' },
+    { className: 'relative', declaration: 'position: relative;' },
+    { className: 'absolute', declaration: 'position: absolute;' },
+    { className: 'fixed', declaration: 'position: fixed;' },
+    { className: 'sticky', declaration: 'position: sticky;' },
+] as const
+
+const sizeUtilities = [
+    { className: 'w-full', declaration: 'width: 100%;' },
+    { className: 'w-fit', declaration: 'width: fit-content;' },
+    { className: 'h-full', declaration: 'height: 100%;' },
+    { className: 'h-dvh', declaration: 'height: 100dvh;' },
+    {
+        className: 'size-full',
+        declaration: 'width: 100%; height: 100%;',
+    },
+    {
+        className: 'size-fit',
+        declaration: 'width: fit-content; height: fit-content;',
+    },
+] as const
+
+const aspectRatioUtilities = [
+    {
+        className: 'aspect-square',
+        declaration: 'aspect-ratio: 1 / 1;',
+        previewClass: 'w-20',
+    },
+    {
+        className: 'aspect-video',
+        declaration: 'aspect-ratio: 16 / 9;',
+        previewClass: 'w-36',
+    },
+    {
+        className: 'aspect-auto',
+        declaration: 'aspect-ratio: auto;',
+        previewClass: 'h-16 w-28',
+    },
+] as const
+
+const helperUtilities = [
+    'section',
+    'container',
+    'page-wrapper',
+    'page-main',
+    'eyebrow',
+] as const
+
+const flexDirectionUtilities = [
+    {
+        className: 'flex-row',
+        declaration: 'flex-direction: row;',
+        label: 'Row',
+    },
+    {
+        className: 'flex-col',
+        declaration: 'flex-direction: column;',
+        label: 'Column',
+    },
+] as const
+
+const flexJustifyUtilities = [
+    {
+        className: 'justify-start',
+        declaration: 'justify-content: flex-start;',
+    },
+    {
+        className: 'justify-center',
+        declaration: 'justify-content: center;',
+    },
+    {
+        className: 'justify-between',
+        declaration: 'justify-content: space-between;',
+    },
+] as const
+
+const flexAlignUtilities = [
+    { className: 'items-start', declaration: 'align-items: flex-start;' },
+    { className: 'items-center', declaration: 'align-items: center;' },
+    { className: 'items-end', declaration: 'align-items: flex-end;' },
+] as const
+
+const gridColumnUtilities = [
+    {
+        className: 'grid-cols-2',
+        declaration: 'grid-template-columns: repeat(2, minmax(0, 1fr));',
+        columns: 2,
+    },
+    {
+        className: 'grid-cols-3',
+        declaration: 'grid-template-columns: repeat(3, minmax(0, 1fr));',
+        columns: 3,
+    },
+    {
+        className: 'grid-cols-4',
+        declaration: 'grid-template-columns: repeat(4, minmax(0, 1fr));',
+        columns: 4,
+    },
+] as const
+
+const layoutPreviewItemClasses =
+    'flex size-10 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-background text-xs font-medium text-primary shadow-xs'
+const layoutCardClasses =
+    'overflow-hidden rounded-xl border border-border bg-card shadow-xs'
+const layoutCardHeaderClasses = 'border-b border-border px-5 py-4'
+const layoutPreviewClasses = 'bg-primary/5 p-5'
+
+const textUtilityCardClasses =
+    'min-h-40 overflow-hidden rounded-xl border border-primary bg-primary/10 p-6'
+const compactUtilityCardClasses =
+    'min-h-32 overflow-hidden rounded-xl border border-primary bg-primary/10 p-6'
+const textPreview = `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+Suspendisse varius enim in eros elementum tristique.
+Duis cursus, mi quis viverra ornare, eros dolor interdum nulla.`
+
+const contentCollectionsExample = `<div>example code block here</div>`
+---
+
+<Layout pageTitle="Style Guide">
+    <section class="section">
+        <div class="container">
+            <h1 class="mb-[0.2em]">Styles</h1>
+        </div>
+    </section>
+    <section id="type">
+        <div class="container">
+            <h2>Typography</h2>
+            <StylesSectionLabel>Fonts</StylesSectionLabel>
+            <div class="grid md:grid-cols-12">
+                <!-- Card -->
+                <div class="col-span-12 md:col-span-6">
+                    <Card
+                        className="overflow-hidden rounded-lg border border-blue-100 bg-blue-100/10"
+                    >
+                        <CardTitle
+                            className="flex min-h-40 items-center justify-center border-b border-border bg-background"
+                        >
+                            <p class="h1 m-4 text-center">Inter Variable</p>
+                        </CardTitle>
+                        <CardHeader />
+                        <CardContent className="">
+                            <h3 class="h4">Headings + Body</h3>
+                            <p>
+                                <span class="font-bold">Type:</span> Sans Serif
+                            </p>
+                            <p>
+                                <span class="font-bold">Weight:</span> Variable
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+            <StylesSectionLabel>Headings</StylesSectionLabel>
+            <div class="grid gap-x-12 gap-y-12 md:grid-cols-2">
+                {
+                    headingLevels.map((level) => {
+                        const Heading =
+                            `h${level}` as keyof HTMLElementTagNameMap
+                        const headingClass = `h${level}`
+
+                        return (
+                            <>
+                                <div>
+                                    <Badge variant="pink" className="mb-4">
+                                        {`<h${level}>`}
+                                    </Badge>
+                                    <Heading>Element</Heading>
+                                </div>
+                                <div>
+                                    <Badge variant="blue" className="mb-4">
+                                        {`.h${level}`}
+                                    </Badge>
+                                    <div class={headingClass}>Class</div>
+                                </div>
+                            </>
+                        )
+                    })
+                }
+            </div>
+            <StylesSectionLabel>Other</StylesSectionLabel>
+            <div class="grid gap-x-12 gap-y-12 md:grid-cols-2">
+                <div class="col-span-12 mb-12">
+                    {
+                        bodyFontSizes.map((fontSize) => (
+                            <div class="mb-8 last:mb-0">
+                                <Badge variant="blue" className="mb-2">
+                                    {fontSize}
+                                </Badge>
+                                <p class={fontSize}>
+                                    How quickly daft jumping zebras vex
+                                </p>
+                            </div>
+                        ))
+                    }
+                    <div class="mb-8 last:mb-0">
+                        <Badge variant="blue" className="mb-2"> eyebrow </Badge>
+                        <p class="eyebrow">Eyebrow</p>
+                    </div>
+                    <div class="mb-8 last:mb-0">
+                        <Badge variant="pink" className="mb-2">
+                            Ordered Lists
+                        </Badge>
+                        <ol>
+                            <li>Example Ordered List</li>
+                            <li>Example Ordered List</li>
+                        </ol>
+                    </div>
+                    <div class="mb-8 last:mb-0">
+                        <Badge variant="pink" className="mb-2">
+                            Unordered Lists
+                        </Badge>
+                        <ul>
+                            <li>Example Unordered List</li>
+                            <li>Example Unordered List</li>
+                        </ul>
+                    </div>
+                    <div class="mb-8 last:mb-0">
+                        <Badge variant="blue" className="mb-4">
+                            rich-text
+                        </Badge>
+                        <RichText>
+                            <h1>Heading 1</h1>
+                            <h2>Heading 2</h2>
+                            <h3>Heading 3</h3>
+                            <h4>Heading 4</h4>
+                            <h5>Heading 5</h5>
+                            <h6>Heading 6</h6>
+                            <p>
+                                Lorem ipsum dolor sit amet, consectetur
+                                adipiscing elit, sed do eiusmod tempor
+                                incididunt ut labore et dolore magna aliqua. Ut
+                                enim ad minim veniam, quis nostrud exercitation
+                                <code>ullamco laboris nisi ut aliquip</code> ex ea
+                                commodo consequat. Duis aute irure dolor in reprehenderit
+                                in voluptate velit esse cillum dolore eu fugiat nulla
+                                pariatur.
+                            </p>
+                            <blockquote>
+                                <p>Blockquote</p>
+                            </blockquote>
+                            <Code
+                                code={contentCollectionsExample}
+                                lang="html"
+                            />
+                            <div class="eyebrow">Ordered list</div>
+                            <ol>
+                                <li>Item 1</li>
+                                <li>Item 2</li>
+                                <li>Item 3</li>
+                            </ol>
+                            <div class="eyebrow">Unordered list</div>
+                            <ul>
+                                <li>Item A</li>
+                                <li>Item B</li>
+                                <li>Item C</li>
+                            </ul>
+                            <p>
+                                <a href="/">Text link</a>
+                            </p>
+                            <p><strong>Bold text</strong></p>
+                            <p><em>Emphasis</em></p>
+                            <p>Super<sup>script</sup></p>
+                            <p>Sub<sub>script</sub></p>
+                        </RichText>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="color" class="section">
+        <div class="container">
+            <h2>Color</h2>
+            <p
+                class="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground"
+            >
+                A visual inventory of every project color. Changes to the theme
+                tokens appear here automatically. For implementation details,
+                see{' '}
+                <a
+                    href="https://ui.shadcn.com/docs/theming"
+                    class="font-medium text-foreground underline underline-offset-4"
+                    >ShadCN theming</a
+                >{' '}
+                or{' '}
+                <a
+                    href="https://tailwindcss.com/docs/colors"
+                    class="font-medium text-foreground underline underline-offset-4"
+                    >Tailwind colors</a
+                >.
+            </p>
+
+            <StylesSectionLabel>Semantic Colors</StylesSectionLabel>
+            <div class="space-y-12">
+                {
+                    semanticColorGroups.map((group) => (
+                        <section
+                            aria-labelledby={`color-${group.title.toLowerCase()}`}
+                        >
+                            <div class="mb-5">
+                                <h4
+                                    id={`color-${group.title.toLowerCase()}`}
+                                    class="mb-0"
+                                >
+                                    {group.title}
+                                </h4>
+                            </div>
+                            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                {group.tokens.map((color) => (
+                                    <ColorTokenCard {...color} />
+                                ))}
+                            </div>
+                        </section>
+                    ))
+                }
+            </div>
+
+            <StylesSectionLabel>Specialized Colors</StylesSectionLabel>
+            <div class="space-y-12">
+                <section aria-labelledby="chart-colors">
+                    <h4 id="chart-colors" class="mb-5">Charts</h4>
+                    <div
+                        class="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+                    >
+                        <div
+                            class="grid sm:grid-cols-2 sm:divide-x sm:divide-border"
+                        >
+                            {
+                                [
+                                    { label: 'Light', className: '' },
+                                    { label: 'Dark', className: 'dark' },
+                                ].map((mode) => (
+                                    <div
+                                        class:list={[
+                                            'bg-background p-4 text-foreground',
+                                            mode.className,
+                                        ]}
+                                    >
+                                        <p class="mb-3 text-xs font-medium">
+                                            {mode.label}
+                                        </p>
+                                        <div class="flex h-20 overflow-hidden rounded-lg border border-border">
+                                            {chartTokens.map((token) => (
+                                                <div
+                                                    class="flex flex-1 items-end justify-start p-2"
+                                                    style={`background: var(--${token});`}
+                                                >
+                                                    <span class="rounded bg-black/65 px-1.5 py-0.5 text-[0.625rem] font-medium text-white">
+                                                        {token.replace(
+                                                            'chart-',
+                                                            ''
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div class="mt-3 flex justify-between gap-2">
+                                            {chartTokens.map((token) => (
+                                                <code class="text-[0.625rem] text-muted-foreground">
+                                                    {token}
+                                                </code>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    </div>
+                </section>
+
+                <section aria-labelledby="sidebar-colors">
+                    <h4 id="sidebar-colors" class="mb-5">Sidebar</h4>
+                    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        {
+                            sidebarTokens.map((color) => (
+                                <ColorTokenCard {...color} />
+                            ))
+                        }
+                    </div>
+                </section>
+            </div>
+
+            <StylesSectionLabel>Foundations</StylesSectionLabel>
+            <p
+                class="mb-8 max-w-3xl text-sm leading-relaxed text-muted-foreground"
+            >
+                Use semantic utilities by default. These are the approved
+                foundation ramps; see the{' '}
+                <a
+                    href="https://tailwindcss.com/docs/colors"
+                    class="font-medium text-foreground underline underline-offset-4"
+                    >Tailwind color reference</a
+                >{' '}
+                for exceptional use.
+            </p>
+            <div class="space-y-10">
+                {
+                    foundationRamps.map((ramp) => (
+                        <section aria-labelledby={`foundation-${ramp.slug}`}>
+                            <h4 id={`foundation-${ramp.slug}`} class="mb-5">
+                                {ramp.name}
+                            </h4>
+                            <div class="grid grid-cols-2 overflow-hidden rounded-xl border border-border md:grid-cols-4 lg:grid-cols-11">
+                                {foundationSteps.map((step) => (
+                                    <div class="min-w-0 bg-card">
+                                        <div
+                                            class="h-16 border-b border-border lg:h-24"
+                                            style={`background: ${ramp.values[step]};`}
+                                            aria-hidden="true"
+                                        />
+                                        <div class="p-3">
+                                            <p class="text-xs font-medium">
+                                                {ramp.name.toLowerCase()}-{step}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+    <section id="utilities" class="section">
+        <div class="container">
+            <h2>Utilities</h2>
+            <StylesSectionLabel>Margin</StylesSectionLabel>
+            <p
+                class="mb-12 max-w-3xl text-sm leading-relaxed text-muted-foreground"
+            >
+                Margin utilities use Tailwind's spacing scale. The striped area
+                shows the space created by each class. See the{' '}
+                <a
+                    href="https://tailwindcss.com/docs/margin"
+                    class="font-medium text-foreground underline underline-offset-4"
+                    >Tailwind margin reference</a
+                >{' '}
+                for negative values, logical properties, and responsive variants.
+            </p>
+
+            <div class="grid gap-x-8 gap-y-12 xl:grid-cols-3">
+                <section aria-labelledby="margin-top">
+                    <h4 id="margin-top" class="mb-5">Top</h4>
+                    <div class="space-y-8">
+                        {
+                            marginScale.map((utility) => (
+                                <div
+                                    class:list={[
+                                        marginStageClasses,
+                                        'flow-root',
+                                    ]}
+                                >
+                                    <div
+                                        class:list={[
+                                            marginExampleClasses,
+                                            utility.topClass,
+                                        ]}
+                                    >
+                                        <Badge variant="blue">
+                                            {utility.topClass}
+                                        </Badge>
+                                        <code>
+                                            margin-top: {utility.value};
+                                        </code>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section aria-labelledby="margin-bottom">
+                    <h4 id="margin-bottom" class="mb-5">Bottom</h4>
+                    <div class="space-y-8">
+                        {
+                            marginScale.map((utility) => (
+                                <div
+                                    class:list={[
+                                        marginStageClasses,
+                                        'flow-root',
+                                    ]}
+                                >
+                                    <div
+                                        class:list={[
+                                            marginExampleClasses,
+                                            utility.bottomClass,
+                                        ]}
+                                    >
+                                        <Badge variant="blue">
+                                            {utility.bottomClass}
+                                        </Badge>
+                                        <code>
+                                            margin-bottom: {utility.value};
+                                        </code>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section aria-labelledby="margin-other">
+                    <h4 id="margin-other" class="mb-5">Other</h4>
+                    <div class="space-y-8">
+                        {
+                            otherMarginUtilities.map((utility) => (
+                                <div
+                                    class:list={[
+                                        marginStageClasses,
+                                        utility.stageClass,
+                                    ]}
+                                >
+                                    <div
+                                        class:list={[
+                                            marginExampleClasses,
+                                            utility.exampleClass,
+                                        ]}
+                                    >
+                                        <Badge variant="blue">
+                                            {utility.className}
+                                        </Badge>
+                                        <code>{utility.declaration}</code>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+            </div>
+
+            <StylesSectionLabel>Padding</StylesSectionLabel>
+            <p
+                class="mb-12 max-w-3xl text-sm leading-relaxed text-muted-foreground"
+            >
+                Padding utilities use Tailwind's spacing scale. The striped area
+                shows the space inside each example. See the{' '}
+                <a
+                    href="https://tailwindcss.com/docs/padding"
+                    class="font-medium text-foreground underline underline-offset-4"
+                    >Tailwind padding reference</a
+                >{' '}
+                for individual sides, logical properties, and responsive variants.
+            </p>
+
+            <div class="grid gap-x-8 gap-y-12 xl:grid-cols-3">
+                <section aria-labelledby="padding-all">
+                    <h4 id="padding-all" class="mb-5">All sides</h4>
+                    <div class="space-y-8">
+                        {
+                            paddingScale.map((utility) => (
+                                <div
+                                    class:list={[
+                                        paddingStageClasses,
+                                        utility.allClass,
+                                    ]}
+                                >
+                                    <div class={spacingExampleClasses}>
+                                        <Badge variant="blue">
+                                            {utility.allClass}
+                                        </Badge>
+                                        <code>padding: {utility.value};</code>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section aria-labelledby="padding-horizontal">
+                    <h4 id="padding-horizontal" class="mb-5">Horizontal</h4>
+                    <div class="space-y-8">
+                        {
+                            paddingScale.map((utility) => (
+                                <div
+                                    class:list={[
+                                        paddingStageClasses,
+                                        utility.horizontalClass,
+                                    ]}
+                                >
+                                    <div class={spacingExampleClasses}>
+                                        <Badge variant="blue">
+                                            {utility.horizontalClass}
+                                        </Badge>
+                                        <code>
+                                            padding-inline: {utility.value};
+                                        </code>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section aria-labelledby="padding-vertical">
+                    <h4 id="padding-vertical" class="mb-5">Vertical</h4>
+                    <div class="space-y-8">
+                        {
+                            paddingScale.map((utility) => (
+                                <div
+                                    class:list={[
+                                        paddingStageClasses,
+                                        utility.verticalClass,
+                                    ]}
+                                >
+                                    <div class={spacingExampleClasses}>
+                                        <Badge variant="blue">
+                                            {utility.verticalClass}
+                                        </Badge>
+                                        <code>
+                                            padding-block: {utility.value};
+                                        </code>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+            </div>
+
+            <StylesSectionLabel>Text</StylesSectionLabel>
+            <section aria-labelledby="text-alignment" class="mb-16">
+                <h4 id="text-alignment" class="mb-5">Alignment</h4>
+                <div class="grid gap-8 md:grid-cols-3">
+                    {
+                        textAlignmentUtilities.map((utility) => (
+                            <div class={textUtilityCardClasses}>
+                                <Badge variant="blue">
+                                    {utility.className}
+                                </Badge>
+                                <code
+                                    class:list={[
+                                        'mt-8 block font-sans text-base',
+                                        utility.className,
+                                    ]}
+                                >
+                                    {utility.declaration}
+                                </code>
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+
+            <section aria-labelledby="line-clamping" class="mb-16">
+                <h4 id="line-clamping" class="mb-5">Clamping</h4>
+                <div class="grid gap-8 md:grid-cols-3">
+                    {
+                        lineClampUtilities.map((utility) => (
+                            <div class={textUtilityCardClasses}>
+                                <Badge variant="blue">
+                                    {utility.className}
+                                </Badge>
+                                <p class="mt-6 mb-2 text-sm italic">
+                                    Multiple properties
+                                </p>
+                                <p
+                                    class:list={[
+                                        'text-sm leading-6 whitespace-pre-line',
+                                        utility.className,
+                                    ]}
+                                >
+                                    {textPreview}
+                                </p>
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+
+            <section aria-labelledby="text-wrapping">
+                <h4 id="text-wrapping" class="mb-5">Wrapping</h4>
+                <div class="grid gap-8 md:grid-cols-3">
+                    {
+                        textWrapUtilities.map((utility) => (
+                            <div class={textUtilityCardClasses}>
+                                <Badge variant="blue">
+                                    {utility.className}
+                                </Badge>
+                                <code class="mt-6 mb-3 block font-sans text-base">
+                                    {utility.declaration}
+                                </code>
+                                <p
+                                    class:list={[
+                                        'max-w-sm text-sm leading-6',
+                                        utility.className,
+                                    ]}
+                                >
+                                    Lorem ipsum dolor sit amet, consectetur
+                                    adipiscing elit. Suspendisse varius enim in
+                                    eros.
+                                </p>
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+
+            <StylesSectionLabel id="overflow">Overflow</StylesSectionLabel>
+            <div class="grid gap-8 md:grid-cols-3">
+                {
+                    overflowUtilities.map((utility) => (
+                        <div class={textUtilityCardClasses}>
+                            <Badge variant="blue">{utility.className}</Badge>
+                            <code class="mt-6 block font-sans text-base">
+                                {utility.declaration}
+                            </code>
+                            <div class="mt-4 rounded-lg border border-primary/30 bg-background p-3">
+                                <div
+                                    class:list={[
+                                        'h-12 rounded border border-dashed border-primary/30',
+                                        utility.className,
+                                    ]}
+                                >
+                                    <div class="w-96 rounded bg-primary/15 p-3 text-sm whitespace-nowrap">
+                                        Overflow content →
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                }
+            </div>
+
+            <StylesSectionLabel id="display-position">
+                Display + position
+            </StylesSectionLabel>
+            <section aria-labelledby="display-utilities" class="mb-16">
+                <h4 id="display-utilities" class="mb-5">Display</h4>
+                <div class="grid gap-8 md:grid-cols-3">
+                    {
+                        displayUtilities.map((utility) => (
+                            <div class={compactUtilityCardClasses}>
+                                <Badge variant="blue">
+                                    {utility.className}
+                                </Badge>
+                                <code class="mt-6 block font-sans text-base">
+                                    {utility.declaration}
+                                </code>
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+
+            <section aria-labelledby="position-utilities">
+                <h4 id="position-utilities" class="mb-5">Position</h4>
+                <div class="grid gap-8 md:grid-cols-3">
+                    {
+                        positionUtilities.map((utility) => (
+                            <div class={compactUtilityCardClasses}>
+                                <Badge variant="blue">
+                                    {utility.className}
+                                </Badge>
+                                <code class="mt-6 block font-sans text-base">
+                                    {utility.declaration}
+                                </code>
+                            </div>
+                        ))
+                    }
+                </div>
+            </section>
+
+            <StylesSectionLabel id="size">Size</StylesSectionLabel>
+            <div class="grid gap-8 md:grid-cols-3">
+                {
+                    sizeUtilities.map((utility) => (
+                        <div class={compactUtilityCardClasses}>
+                            <Badge variant="blue">{utility.className}</Badge>
+                            <code class="mt-6 block font-sans text-base">
+                                {utility.declaration}
+                            </code>
+                        </div>
+                    ))
+                }
+            </div>
+
+            <StylesSectionLabel id="aspect-ratio"
+                >Aspect ratio</StylesSectionLabel
+            >
+            <div class="grid gap-8 md:grid-cols-3">
+                {
+                    aspectRatioUtilities.map((utility) => (
+                        <div class={textUtilityCardClasses}>
+                            <Badge variant="blue">{utility.className}</Badge>
+                            <code class="mt-6 block font-sans text-base">
+                                {utility.declaration}
+                            </code>
+                            <div
+                                class:list={[
+                                    'mt-4 rounded-lg bg-primary/20',
+                                    utility.className,
+                                    utility.previewClass,
+                                ]}
+                                aria-hidden="true"
+                            />
+                        </div>
+                    ))
+                }
+            </div>
+
+            <StylesSectionLabel id="helper-classes">
+                Helper classes
+            </StylesSectionLabel>
+            <div class="grid gap-8 md:grid-cols-3">
+                {
+                    helperUtilities.map((className) => (
+                        <div class={compactUtilityCardClasses}>
+                            <Badge variant="blue">{className}</Badge>
+                            <p class="mt-6 text-sm italic">Project utility</p>
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+    </section>
+    <section id="layout" class="section">
+        <div class="container">
+            <h2>Layout</h2>
+            <p
+                class="mt-4 max-w-3xl text-base leading-relaxed text-muted-foreground"
+            >
+                Flexbox arranges content along one primary axis. Grid controls
+                rows and columns together. Combine either display utility with
+                gap, alignment, and responsive variants to build page layouts.
+            </p>
+
+            <StylesSectionLabel id="flexbox">Flexbox</StylesSectionLabel>
+            <div class="grid gap-8 xl:grid-cols-2">
+                <section aria-labelledby="flex-direction">
+                    <h4 id="flex-direction" class="mb-5">Direction</h4>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        {
+                            flexDirectionUtilities.map((utility) => (
+                                <div class={layoutCardClasses}>
+                                    <div class={layoutCardHeaderClasses}>
+                                        <Badge variant="blue">
+                                            {utility.className}
+                                        </Badge>
+                                        <code class="mt-3 block text-xs text-muted-foreground">
+                                            {utility.declaration}
+                                        </code>
+                                    </div>
+                                    <div class={layoutPreviewClasses}>
+                                        <div
+                                            class:list={[
+                                                'flex min-h-32 gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4',
+                                                utility.className,
+                                            ]}
+                                        >
+                                            {[1, 2, 3].map((item) => (
+                                                <div
+                                                    class={
+                                                        layoutPreviewItemClasses
+                                                    }
+                                                >
+                                                    {item}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section aria-labelledby="flex-wrap">
+                    <h4 id="flex-wrap" class="mb-5">Wrap + gap</h4>
+                    <div class={layoutCardClasses}>
+                        <div class={layoutCardHeaderClasses}>
+                            <div class="flex flex-wrap gap-2">
+                                <Badge variant="blue">flex-wrap</Badge>
+                                <Badge variant="blue">gap-3</Badge>
+                            </div>
+                            <code
+                                class="mt-3 block text-xs text-muted-foreground"
+                            >
+                                flex-wrap: wrap; gap: 0.75rem;
+                            </code>
+                        </div>
+                        <div class={layoutPreviewClasses}>
+                            <div
+                                class="flex min-h-32 max-w-md flex-wrap content-start gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4"
+                            >
+                                {
+                                    [1, 2, 3, 4, 5, 6].map((item) => (
+                                        <div
+                                            class:list={[
+                                                layoutPreviewItemClasses,
+                                                'w-20',
+                                            ]}
+                                        >
+                                            {item}
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section aria-labelledby="flex-justify">
+                    <h4 id="flex-justify" class="mb-5">Main-axis alignment</h4>
+                    <div class="space-y-4">
+                        {
+                            flexJustifyUtilities.map((utility) => (
+                                <div class={layoutCardClasses}>
+                                    <div class={layoutCardHeaderClasses}>
+                                        <div class="flex flex-wrap items-center justify-between gap-3">
+                                            <Badge variant="blue">
+                                                {utility.className}
+                                            </Badge>
+                                            <code class="text-xs text-muted-foreground">
+                                                {utility.declaration}
+                                            </code>
+                                        </div>
+                                    </div>
+                                    <div class={layoutPreviewClasses}>
+                                        <div
+                                            class:list={[
+                                                'flex gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4',
+                                                utility.className,
+                                            ]}
+                                        >
+                                            {[1, 2, 3].map((item) => (
+                                                <div
+                                                    class={
+                                                        layoutPreviewItemClasses
+                                                    }
+                                                >
+                                                    {item}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section aria-labelledby="flex-align">
+                    <h4 id="flex-align" class="mb-5">Cross-axis alignment</h4>
+                    <div class="space-y-4">
+                        {
+                            flexAlignUtilities.map((utility) => (
+                                <div class={layoutCardClasses}>
+                                    <div class={layoutCardHeaderClasses}>
+                                        <div class="flex flex-wrap items-center justify-between gap-3">
+                                            <Badge variant="blue">
+                                                {utility.className}
+                                            </Badge>
+                                            <code class="text-xs text-muted-foreground">
+                                                {utility.declaration}
+                                            </code>
+                                        </div>
+                                    </div>
+                                    <div class={layoutPreviewClasses}>
+                                        <div
+                                            class:list={[
+                                                'flex h-28 gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4',
+                                                utility.className,
+                                            ]}
+                                        >
+                                            {[1, 2, 3].map((item) => (
+                                                <div
+                                                    class:list={[
+                                                        layoutPreviewItemClasses,
+                                                        item === 2 && 'h-16',
+                                                    ]}
+                                                >
+                                                    {item}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+            </div>
+
+            <section aria-labelledby="flex-sizing" class="mt-16">
+                <h4 id="flex-sizing" class="mb-5">Item sizing</h4>
+                <div class={layoutCardClasses}>
+                    <div class={layoutCardHeaderClasses}>
+                        <div class="flex flex-wrap gap-2">
+                            <Badge variant="blue">basis-1/3</Badge>
+                            <Badge variant="blue">grow</Badge>
+                            <Badge variant="blue">shrink-0</Badge>
+                        </div>
+                        <p class="mt-3 text-sm text-muted-foreground">
+                            Set an initial size, distribute free space, or
+                            prevent an item from shrinking.
+                        </p>
+                    </div>
+                    <div class={layoutPreviewClasses}>
+                        <div
+                            class="flex gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4"
+                        >
+                            <div
+                                class="flex basis-1/3 items-center justify-center rounded-md border border-primary/30 bg-primary/10 p-4 text-center text-xs font-medium text-primary"
+                            >
+                                basis-1/3
+                            </div>
+                            <div
+                                class="flex grow items-center justify-center rounded-md border border-primary/30 bg-primary/20 p-4 text-center text-xs font-medium text-primary"
+                            >
+                                grow
+                            </div>
+                            <div
+                                class="flex w-24 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-background p-4 text-center text-xs font-medium text-primary"
+                            >
+                                shrink-0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <StylesSectionLabel id="grid">Grid</StylesSectionLabel>
+            <div class="grid gap-8 xl:grid-cols-2">
+                <section aria-labelledby="grid-columns">
+                    <h4 id="grid-columns" class="mb-5">Columns</h4>
+                    <div class="space-y-4">
+                        {
+                            gridColumnUtilities.map((utility) => (
+                                <div class={layoutCardClasses}>
+                                    <div class={layoutCardHeaderClasses}>
+                                        <Badge variant="blue">
+                                            {utility.className}
+                                        </Badge>
+                                        <code class="mt-3 block overflow-x-auto text-xs text-muted-foreground">
+                                            {utility.declaration}
+                                        </code>
+                                    </div>
+                                    <div class={layoutPreviewClasses}>
+                                        <div
+                                            class:list={[
+                                                'grid gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4',
+                                                utility.className,
+                                            ]}
+                                        >
+                                            {Array.from({
+                                                length: utility.columns * 2,
+                                            }).map((_, index) => (
+                                                <div class="flex h-12 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-xs font-medium text-primary">
+                                                    {index + 1}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+                </section>
+
+                <section aria-labelledby="grid-placement">
+                    <h4 id="grid-placement" class="mb-5">
+                        Spanning + placement
+                    </h4>
+                    <div class="space-y-4">
+                        <div class={layoutCardClasses}>
+                            <div class={layoutCardHeaderClasses}>
+                                <div class="flex flex-wrap gap-2">
+                                    <Badge variant="blue">grid-cols-3</Badge>
+                                    <Badge variant="blue">col-span-2</Badge>
+                                </div>
+                                <code
+                                    class="mt-3 block text-xs text-muted-foreground"
+                                >
+                                    grid-column: span 2 / span 2;
+                                </code>
+                            </div>
+                            <div class={layoutPreviewClasses}>
+                                <div
+                                    class="grid grid-cols-3 gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4"
+                                >
+                                    <div
+                                        class="col-span-2 flex h-14 items-center justify-center rounded-md border border-primary/30 bg-primary/20 text-xs font-medium text-primary"
+                                    >
+                                        col-span-2
+                                    </div>
+                                    <div
+                                        class="flex h-14 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-xs font-medium text-primary"
+                                    >
+                                        1 column
+                                    </div>
+                                    <div
+                                        class="flex h-14 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-xs font-medium text-primary"
+                                    >
+                                        1 column
+                                    </div>
+                                    <div
+                                        class="col-span-2 flex h-14 items-center justify-center rounded-md border border-primary/30 bg-primary/20 text-xs font-medium text-primary"
+                                    >
+                                        col-span-2
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class={layoutCardClasses}>
+                            <div class={layoutCardHeaderClasses}>
+                                <div class="flex flex-wrap gap-2">
+                                    <Badge variant="blue">col-start-2</Badge>
+                                    <Badge variant="blue">col-end-4</Badge>
+                                </div>
+                                <code
+                                    class="mt-3 block text-xs text-muted-foreground"
+                                >
+                                    grid-column: 2 / 4;
+                                </code>
+                            </div>
+                            <div class={layoutPreviewClasses}>
+                                <div
+                                    class="grid grid-cols-4 gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4"
+                                >
+                                    <div
+                                        class="col-start-2 col-end-4 flex h-14 items-center justify-center rounded-md border border-primary/30 bg-primary/20 text-xs font-medium text-primary"
+                                    >
+                                        columns 2–3
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section aria-labelledby="grid-rows">
+                    <h4 id="grid-rows" class="mb-5">Rows</h4>
+                    <div class={layoutCardClasses}>
+                        <div class={layoutCardHeaderClasses}>
+                            <div class="flex flex-wrap gap-2">
+                                <Badge variant="blue">grid-rows-2</Badge>
+                                <Badge variant="blue">grid-flow-col</Badge>
+                            </div>
+                            <code
+                                class="mt-3 block text-xs text-muted-foreground"
+                            >
+                                grid-template-rows: repeat(2, minmax(0, 1fr));
+                            </code>
+                        </div>
+                        <div class={layoutPreviewClasses}>
+                            <div
+                                class="grid h-40 grid-flow-col grid-rows-2 gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4"
+                            >
+                                {
+                                    [1, 2, 3, 4, 5, 6].map((item) => (
+                                        <div class="flex items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-xs font-medium text-primary">
+                                            {item}
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section aria-labelledby="responsive-grid">
+                    <h4 id="responsive-grid" class="mb-5">
+                        Responsive composition
+                    </h4>
+                    <div class={layoutCardClasses}>
+                        <div class={layoutCardHeaderClasses}>
+                            <div class="flex flex-wrap gap-2">
+                                <Badge variant="blue">grid-cols-1</Badge>
+                                <Badge variant="blue">sm:grid-cols-2</Badge>
+                                <Badge variant="blue">lg:grid-cols-4</Badge>
+                            </div>
+                            <p class="mt-3 text-sm text-muted-foreground">
+                                Start with one column, then add columns as space
+                                becomes available.
+                            </p>
+                        </div>
+                        <div class={layoutPreviewClasses}>
+                            <div
+                                class="grid grid-cols-1 gap-3 rounded-lg border border-dashed border-primary/30 bg-background p-4 sm:grid-cols-2 lg:grid-cols-4"
+                            >
+                                {
+                                    [1, 2, 3, 4].map((item) => (
+                                        <div class="flex h-16 items-center justify-center rounded-md border border-primary/30 bg-primary/10 text-xs font-medium text-primary">
+                                            {item}
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="mt-12 rounded-xl border border-border bg-muted/40 p-6">
+                <p class="font-medium text-foreground">Choosing a system</p>
+                <p
+                    class="mt-2 max-w-4xl text-sm leading-relaxed text-muted-foreground"
+                >
+                    Use <code class="text-foreground">flex</code> for navigation,
+                    toolbars, and components that primarily flow in one direction.
+                    Use <code class="text-foreground">grid</code> for card collections,
+                    dashboards, and layouts where rows and columns need to stay aligned.
+                </p>
+            </div>
+        </div>
+    </section>
+</Layout>

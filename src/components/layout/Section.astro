@@ -1,0 +1,13 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+import { cn } from '@/lib/utils'
+
+export interface Props extends HTMLAttributes<'section'> {}
+
+const { class: className, ...attributes } = Astro.props
+---
+
+<section {...attributes} class={cn('section', className)}>
+    <slot />
+</section>

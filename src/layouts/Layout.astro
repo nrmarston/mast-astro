@@ -1,0 +1,28 @@
+---
+const { pageTitle } = Astro.props;
+import Nav from "@/components/Nav.astro";
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="description" content="The styles page is coming soon." />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{pageTitle}</title>
+    </head>
+    <body>
+        <div class:list={["page-wrapper", { "min-h-screen": Astro.url.pathname === "/" }]}>
+            <!-- Nav -->
+            <Nav/>
+            <main class="page-main">
+                <slot />
+            </main>
+            <!-- Footer -->
+        </div>
+    </body>
+</html>

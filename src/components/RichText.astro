@@ -1,0 +1,274 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+export interface Props extends HTMLAttributes<'div'> {
+    size?: 'sm' | 'md' | 'lg'
+}
+
+const { size = 'md', class: className, ...attributes } = Astro.props
+---
+
+<div {...attributes} class:list={['rich-text', className]} data-size={size}>
+    <slot />
+</div>
+
+<style>
+    .rich-text {
+        --rich-text-font-size: 1rem;
+        --rich-text-flow-space: 1.5em;
+        --rich-text-heading-space: 2em;
+
+        width: 100%;
+        max-width: 68ch;
+        color: var(--foreground);
+        font-size: var(--rich-text-font-size);
+        line-height: 1.75;
+        overflow-wrap: break-word;
+    }
+
+    .rich-text[data-size='sm'] {
+        --rich-text-font-size: 0.9375rem;
+    }
+
+    .rich-text[data-size='lg'] {
+        --rich-text-font-size: 1.125rem;
+    }
+
+    .rich-text :global(:is(h1, h2, h3, h4, h5, h6)) {
+        margin-block-start: var(--rich-text-heading-space);
+    }
+
+    .rich-text :global(h1) {
+        --font-size-min: 2.52rem;
+        --font-size-max: 4.95rem;
+        font-size: clamp(var(--font-size-min), 3.6vw, var(--font-size-max));
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.2em;
+    }
+
+    .rich-text :global(h2) {
+        --font-size-min: 1.8rem;
+        --font-size-max: 3.42rem;
+        font-size: clamp(var(--font-size-min), 2.7vw, var(--font-size-max));
+        font-weight: 500;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.2em;
+    }
+
+    .rich-text :global(h3) {
+        --font-size-min: 1.35rem;
+        --font-size-max: 2.07rem;
+        font-size: clamp(var(--font-size-min), 1.8vw, var(--font-size-max));
+        font-weight: 500;
+        line-height: 1.2;
+        letter-spacing: 0;
+        margin-bottom: 0.3em;
+    }
+
+    .rich-text :global(h4) {
+        --font-size-min: 1.17rem;
+        --font-size-max: 1.35rem;
+        font-size: clamp(var(--font-size-min), 1.35vw, var(--font-size-max));
+        font-weight: 500;
+        line-height: 1.4;
+        letter-spacing: 0;
+        margin-bottom: 0.4em;
+    }
+
+    .rich-text :global(h5) {
+        --font-size-min: 0.99rem;
+        --font-size-max: 1.08rem;
+        font-size: clamp(var(--font-size-min), 0.9vw, var(--font-size-max));
+        font-weight: 500;
+        line-height: 1.4;
+        letter-spacing: 0;
+        margin-bottom: 0.5em;
+    }
+
+    .rich-text :global(h6) {
+        --font-size-min: 0.81rem;
+        --font-size-max: 0.9rem;
+        font-size: clamp(var(--font-size-min), 0.72vw, var(--font-size-max));
+        font-weight: 500;
+        line-height: 1.4;
+        letter-spacing: 0;
+        margin-bottom: 0.6em;
+    }
+
+    .rich-text
+        :global(:is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6)) {
+        margin-block-start: 1em;
+    }
+
+    .rich-text :global(:is(p, ul, ol, blockquote, figure, pre, table)) {
+        margin-block: 0 var(--rich-text-flow-space);
+    }
+
+    .rich-text :global(a) {
+        color: var(--primary);
+        font-weight: 500;
+        text-decoration: underline;
+        text-decoration-thickness: 0.08em;
+        text-underline-offset: 0.18em;
+    }
+
+    .rich-text :global(a:hover) {
+        text-decoration-thickness: 0.12em;
+    }
+
+    .rich-text :global(a:focus-visible) {
+        border-radius: var(--radius-sm);
+        outline: 0.2em solid color-mix(in oklch, var(--ring) 45%, transparent);
+        outline-offset: 0.15em;
+    }
+
+    .rich-text :global(strong) {
+        font-weight: 650;
+    }
+
+    .rich-text :global(em) {
+        font-style: italic;
+    }
+
+    .rich-text :global(:is(ul, ol)) {
+        padding-inline-start: 1.5em;
+    }
+
+    .rich-text :global(ul) {
+        list-style-type: disc;
+    }
+
+    .rich-text :global(ol) {
+        list-style-type: decimal;
+    }
+
+    .rich-text :global(li) {
+        padding-inline-start: 0.25em;
+        margin-block: 0.35em;
+    }
+
+    .rich-text :global(li::marker) {
+        color: var(--muted-foreground);
+    }
+
+    .rich-text :global(li > :is(ul, ol)) {
+        margin-block: 0.5em 0;
+    }
+
+    .rich-text :global(li > p) {
+        margin-block: 0.5em;
+    }
+
+    .rich-text :global(blockquote) {
+        padding: 0.25em 0 0.25em 1.25em;
+        border-inline-start: 0.25em solid var(--primary);
+        color: var(--muted-foreground);
+        font-style: italic;
+    }
+
+    .rich-text :global(blockquote > :last-child) {
+        margin-block-end: 0;
+    }
+
+    .rich-text :global(hr) {
+        height: 1px;
+        margin-block: calc(var(--rich-text-heading-space) * 1.25);
+        border: 0;
+        background: var(--border);
+    }
+
+    .rich-text :global(img) {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin-block: calc(var(--rich-text-flow-space) * 1.25);
+        border-radius: var(--radius-lg);
+    }
+
+    .rich-text :global(figure > img) {
+        margin-block: 0;
+    }
+
+    .rich-text :global(figcaption) {
+        margin-block-start: 0.65em;
+        color: var(--muted-foreground);
+        font-size: 0.875em;
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    .rich-text :global(code) {
+        border-radius: var(--radius-sm);
+        background: var(--muted);
+        padding: 0.15em 0.35em;
+        font-size: 0.875em;
+        font-weight: 500;
+    }
+
+    .rich-text :global(pre) {
+        max-width: 100%;
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--muted);
+        padding: 1em 1.25em;
+        line-height: 1.65;
+        tab-size: 4;
+    }
+
+    .rich-text :global(pre code) {
+        border-radius: 0;
+        background: transparent;
+        padding: 0;
+        font-size: 0.875em;
+        font-weight: inherit;
+    }
+
+    .rich-text :global(table) {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+        font-size: 0.9375em;
+        line-height: 1.5;
+    }
+
+    .rich-text :global(:is(th, td)) {
+        min-width: 8rem;
+        padding: 0.65em 0.85em;
+        border-block-end: 1px solid var(--border);
+        text-align: start;
+        vertical-align: top;
+    }
+
+    .rich-text :global(th) {
+        color: var(--foreground);
+        font-weight: 650;
+    }
+
+    .rich-text :global(p) {
+        margin-bottom: 1em;
+    }
+
+    .rich-text :global(tbody tr:last-child td) {
+        border-block-end: 0;
+    }
+
+    .rich-text > :global(:first-child) {
+        margin-block-start: 0;
+    }
+
+    .rich-text > :global(:last-child) {
+        margin-block-end: 0;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .rich-text :global(a) {
+            transition: text-decoration-thickness 150ms ease;
+        }
+    }
+</style>

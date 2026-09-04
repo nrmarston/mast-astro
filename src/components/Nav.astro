@@ -1,0 +1,20 @@
+---
+import Logo from '../assets/logo.svg'
+import { Container } from './layout'
+import { NavMenu } from './NavMenu'
+---
+
+<div class="sticky top-0 z-50 border-b border-border bg-background">
+    <Container>
+        <div
+            class="z-9999 flex items-center justify-between py-4 leading-[1.1] capitalize"
+        >
+            <a href="/" class="w-16 p-0 text-primary">
+                <div class="flex items-center">
+                    <Logo />
+                </div>
+            </a>
+            <NavMenu currentPath={Astro.url.pathname} client:load />
+        </div>
+    </Container>
+</div>

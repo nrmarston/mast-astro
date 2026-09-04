@@ -1,0 +1,23 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ComponentsShowcase from "@/components/ComponentsShowcase";
+---
+
+<Layout pageTitle="Components">
+    <section class="section border-b bg-muted/30">
+        <div class="container">
+            <p class="eyebrow text-muted-foreground">shadcn/ui · Base UI</p>
+            <h1 class="max-w-4xl">Components</h1>
+            <p class="mt-5 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
+                Every component installed in this project, arranged alphabetically
+                with a live, interactive example.
+            </p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <ComponentsShowcase client:load />
+        </div>
+    </section>
+</Layout>

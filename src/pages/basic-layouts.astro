@@ -1,0 +1,36 @@
+---
+import { Column, Container, Row, Section } from '@/components/layout'
+import { Button } from '@/components/ui/button'
+import Layout from '@/layouts/Layout.astro'
+---
+
+<Layout pageTitle="Basic Layouts">
+    <Section>
+        <Container>
+            <h1 class="sr-only">Basic Layouts</h1>
+            <Row class="mt-12">
+                <Column span={8} class="col-start-3 text-center">
+                    <div class="mx-auto mb-3 h-px w-16 bg-foreground"></div>
+                    <p class="eyebrow mb-6">Lorem ipsum</p>
+                    <h2 class="text-5xl tracking-tight md:text-7xl">
+                        A simple header
+                    </h2>
+                    <p
+                        class="mx-auto mt-5 max-w-4xl text-base leading-7 text-muted-foreground md:text-lg"
+                    >
+                        Lorem ipsum dolor sit amet consectetur adipiscing elit enim
+                        porttitor, ornare luctus dignissim posuere platea aliquam
+                        turpis taciti fusce, diam arcu mollis phasellus mattis ad
+                        suspendisse integer.
+                    </p>
+                    <Row
+                        class="mt-6 grid-cols-[repeat(2,max-content)] justify-center gap-3"
+                    >
+                        <Button>Variant Default</Button>
+                        <Button variant="outline">Variant Outline</Button>
+                    </Row>
+                </Column>
+            </Row>
+        </Container>
+    </Section>
+</Layout>

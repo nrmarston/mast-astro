@@ -1,0 +1,13 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+
+import { cn } from '@/lib/utils'
+
+export interface Props extends HTMLAttributes<'div'> {}
+
+const { class: className, ...attributes } = Astro.props
+---
+
+<div {...attributes} class={cn('grid grid-cols-12 gap-6', className)}>
+    <slot />
+</div>

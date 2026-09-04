@@ -1,17 +1,65 @@
 ---
-
+import { LinkButton } from '@/components/LinkButton'
+import { Container, Section } from '@/components/layout'
+import Layout from '@/layouts/Layout.astro'
+import Logo from '../assets/noCodeSupplyLogo.svg'
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout pageTitle="Mast Astro">
+    <div
+        class="flex flex-1 flex-col items-stretch justify-between gap-(--section-padding) py-[5%]"
+    >
+        <Section>
+            <Container>
+                <h1>Style Guide</h1>
+                <p class="text-xl">
+                    Get started with a lightweight, component-first framework
+                    for Astro.
+                </p>
+                <div class="my-8 border-b border-border"></div>
+                <div class="flex flex-wrap items-center gap-4">
+                    <div class="w-full text-sm font-medium uppercase lg:w-fit">
+                        Get started:
+                    </div>
+                    <div>
+                        <LinkButton size={'lg'} href="/styles" text="Styles" />
+                    </div>
+                    <div>
+                        <LinkButton
+                            size={'lg'}
+                            href="/components"
+                            text="Components"
+                        />
+                    </div>
+                    <div>
+                        <LinkButton
+                            size={'lg'}
+                            href="/basic-layouts"
+                            text="Basic layouts"
+                            variant={'outline'}
+                        />
+                    </div>
+                    <div>
+                        <LinkButton
+                            size={'lg'}
+                            href="/inspired-layouts"
+                            text="Inspired layouts"
+                            variant={'outline'}
+                        />
+                    </div>
+                </div>
+            </Container>
+        </Section>
+        <Container>
+            <a
+                href="http://nocodesupply.co/mast"
+                target="_blank"
+                referrerpolicy="no-referrer"
+                class="flex items-center"
+            >
+                <Logo class="mr-3 size-8 text-primary" />
+                <div>Built by No-Code Supply Co.</div>
+            </a>
+        </Container>
+    </div>
+</Layout>
